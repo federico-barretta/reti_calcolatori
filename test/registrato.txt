@@ -1,0 +1,6 @@
+reg1.txt
+reg2.txt
+reg3.txt
+reg4.txt
+reg5.txt
+reg6.txt
