@@ -7,23 +7,30 @@
 #include <sys/socket.h>
 #include <unistd.h> // read(), write(), close()
 
-#define MAX 80
+#include "client_dtp.h"
+
+#define MAX 256
 #define PORT 8080
 #define SA struct sockaddr
 
-void func(int sockfd){
+void func(int sockfd, struct sockaddr_in servaddr){
 	char buff[MAX];
 	int n;
 	for (;;) {
 		bzero(buff, sizeof(buff));
 		read(sockfd, buff, sizeof(buff));
-		printf("From Server : %s", buff);
+		if (strncmp(buff, "2", 1) == 0){
+			receive_file (sockfd, 2 , servaddr);
+			read_file(2);
+		} else
+			printf("Server :\n %s", buff);
 		if ((strncmp(buff, "exit", 4)) == 0) {
+			//execlp("rm", "rm", "-f", "*.txt");
 			printf("Client Exit...\n");
 			break;
 		}
 		bzero(buff, sizeof(buff));
-		printf("Enter the string : ");
+		printf("\n> ");
 		n = 0;
 		while ((buff[n++] = getchar()) != '\n');
 		write(sockfd, buff, sizeof(buff));
@@ -64,7 +71,7 @@ int main(){
 		printf("connected to the server..\n");
 
 	// function for chat
-	func(sockfd);
+	func(sockfd, servaddr);
 
 	// close the socket
 	close(sockfd);

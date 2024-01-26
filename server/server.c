@@ -7,7 +7,9 @@
 #include <sys/types.h>
 #include <unistd.h> // read(), write(), close()
 
-#define MAX 80
+#include "server_dtp.h"
+
+#define MAX 256
 #define PORT 8080
 #define SA struct sockaddr
 
@@ -38,7 +40,7 @@ int login(int connfd){
 			read(connfd, buff, sizeof(buff));
 			if (strncmp(buff, "admin", 5) == 0){
 				bzero(buff, MAX);
-				strcpy(buff, "*** BENTORNATO ***");
+				strcpy(buff, "*** BENTORNATO ***\nPress <Enter> to continue");
 				write(connfd, buff, sizeof(buff));
 				bzero(buff, MAX);
 			}else{
@@ -51,7 +53,7 @@ int login(int connfd){
 			return 1;
 		}	else if (strncmp(buff, "2", 1) == 0){
 			bzero(buff, MAX);
-			strcpy(buff, "*** BENVENUTO ***");
+			strcpy(buff, "*** BENVENUTO ***\nPress <Enter> to continue");
 			write(connfd, buff, sizeof(buff));
 			bzero(buff, MAX);
 			return 2;
@@ -63,6 +65,19 @@ int login(int connfd){
 			check = 0;
 		}
 	}while(check == 0);
+}
+
+void send_info(int connfd, int id){
+
+	char buff [MAX];
+	read(connfd, buff, sizeof(buff));
+	bzero(buff, MAX);
+	if (id == 1)
+		strcpy(buff, "1");
+	else if (id == 2)
+		strcpy(buff, "2");
+	write(connfd, buff, sizeof(buff));
+	bzero(buff, MAX);
 }
 
 // Function designed for exchange message
@@ -147,6 +162,14 @@ int main(){
 	// Login phase
 	int log = login(connfd);
 	printf("Login ended with value: %d\n", log);
+
+	send_info(connfd, log);
+	printf("The info are sent\n");
+	send_file(sockfd, connfd, servaddr, cli, log);
+	// Send 1/2 to Client
+	// Send an.txt/rg.txt to client
+	// Receive choice for download
+	// Send chosen file
 
 	// Function for exchange message between client and server
 	func(connfd);
