@@ -19,8 +19,9 @@
 #define A_FILE "an.txt"
 #define R_FILE "rg.txt"
 
-void receive_file ();
-void send_file(int , int , struct sockaddr_in , struct sockaddr_in , int );
-void edit_file_name(int ); // exec for the dir_file | fopen for the content
+void receive_file (int , char * );
+void edit_rg (char * );
+void send_file(int , int , struct sockaddr_in , struct sockaddr_in , char * );
+void edit_file_name(char * , char * ); // exec for the dir_file | fopen for the content
 
 #endif // _SERVER_DTP_H_

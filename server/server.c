@@ -19,9 +19,6 @@ int login(int connfd){
 	char buff[MAX];
 	int check = 0;
 
-	// 1 - Login
-	// 2 - Anonymous
-
 	bzero(buff, MAX);
 
 	// Joining choice
@@ -80,42 +77,171 @@ void send_info(int connfd, int id){
 	bzero(buff, MAX);
 }
 
-// Function designed for exchange message
-void func(int connfd){
+// Function designed to manage the client choices
+void op_choice (int sockfd, int connfd, struct sockaddr_in servaddr, struct sockaddr_in cli, int id){
 
 	char buff[MAX];
-	int n;
-	int counter_message = 0;
-	// infinite loop for chat
-	for (;;) {
+	char *op;
+        
+	if (id == 1){
+	
 		bzero(buff, MAX);
-
-		// read the message from client and copy it in buffer
-		read(connfd, buff, sizeof(buff));
-		// print buffer which contains the client contents
-		printf("From client: %s\t To client : ", buff);
-		//bzero(buff, MAX);
-		//n = 0;
-
-		// copy server message in the buffer
-		//while ((buff[n++] = getchar()) != '\n');
-
-    counter_message += 1;
-
-		// and send that buffer to client
+		strcpy(buff, "\t1 - Download\n\t2 - Upload\n\t3 - Rename\n\t0 - Exit\n");
 		write(connfd, buff, sizeof(buff));
 
-		// if msg contains "Exit" then server exit and chat ended.
-		if (strncmp("exit", buff, 4) == 0) {
+		bzero(buff, MAX);
+		read(connfd, buff, sizeof(buff));
+
+		if (strncmp(buff, "1", 1) == 0){
+
+			bzero(buff, MAX);
+			strcpy(buff, "\tInsert file name:\n");
+			write(connfd, buff, sizeof(buff));
+
+			bzero(buff, MAX);
+			read(connfd, buff, sizeof(buff));
+
+			char fc[256];
+			strcpy(fc,buff);
+			fc[strcspn(fc,"\r\n")] = 0;
+
+			bzero(buff, MAX);
+			strcpy(buff, "r");
+			write(connfd, buff, sizeof(buff));
+
+
+			bzero(buff, MAX);
+			send_file(sockfd, connfd, servaddr, cli, fc);
+
+		} else if (strncmp(buff, "2", 1) == 0){
+
+			bzero(buff, MAX);
+			strcpy(buff, "\tInsert file name:\n");
+			write(connfd, buff, sizeof(buff));
+
+			bzero(buff, MAX);
+			read(connfd, buff, sizeof(buff));
+
+			char fc[256];
+			strcpy(fc,buff);
+			fc[strcspn(fc,"\r\n")] = 0;
+
+			bzero(buff, MAX);
+			strcpy(buff, "w");
+			write(connfd, buff, sizeof(buff));
+
+
+			bzero(buff, MAX);
+			receive_file(connfd, fc);
+
+		} else if (strncmp(buff, "3", 1) == 0){
+
+			char o_name[MAX];
+			char n_name[MAX];
+
+			bzero(buff, MAX);
+			strcpy(buff, "\tInsert the old file name:\n");
+			write(connfd, buff, sizeof(buff));
+
+			bzero(buff, MAX);
+			read(connfd, buff, sizeof(buff));
+
+			strcpy(o_name, buff);
+			o_name[strcspn(o_name,"\r\n")] = 0;
+
+			bzero(buff, MAX);
+			strcpy(buff, "\tInsert the new file name:\n");
+			write(connfd, buff, sizeof(buff));
+
+			bzero(buff, MAX);
+			read(connfd, buff, sizeof(buff));
+
+			strcpy(n_name, buff);
+			n_name[strcspn(n_name,"\r\n")] = 0;
+
+			edit_file_name(o_name, n_name);
+
+			bzero(buff, MAX);
+			strcpy(buff, "\tFile name changed\n");
+			write(connfd, buff, sizeof(buff));
+
+			bzero(buff, MAX);
+
+		} else if (strncmp(buff, "0", 1) == 0){
+
+			bzero(buff, MAX);
+			strcpy(buff, "exit");
+			write(connfd, buff, sizeof(buff));
+			bzero(buff, MAX);
+			
+			strcpy(buff,R_FILE);
+			write(connfd, buff, sizeof(buff));
+			bzero(buff, MAX);
+
 			printf("Server Exit...\n");
+			while(1)
 			break;
+
 		}
+	
+	} else if (id == 2){
+	
+		bzero(buff, MAX);
+		strcpy(buff, "\t1 - Download\n\t0 - Exit\n");
+		write(connfd, buff, sizeof(buff));
+
+		bzero(buff, MAX);
+		read(connfd, buff, sizeof(buff));
+
+		if (strncmp(buff, "1", 1) == 0){
+
+			bzero(buff, MAX);
+			strcpy(buff, "\tInsert file name:\n");
+			write(connfd, buff, sizeof(buff));
+
+			bzero(buff, MAX);
+			read(connfd, buff, sizeof(buff));
+
+			char fc[256];
+			strcpy(fc,buff);
+			fc[strcspn(fc,"\r\n")] = 0;
+
+			bzero(buff, MAX);
+			strcpy(buff, "r");
+			write(connfd, buff, sizeof(buff));
+
+			bzero(buff, MAX);
+			send_file(sockfd, connfd, servaddr, cli, fc);
+
+		} else if (strncmp(buff, "0", 1) == 0){
+
+			bzero(buff, MAX);
+			strcpy(buff, "exit");
+			write(connfd, buff, sizeof(buff));
+			bzero(buff, MAX);
+			
+			strcpy(buff,A_FILE);
+			write(connfd, buff, sizeof(buff));
+			bzero(buff, MAX);
+
+			printf("Server Exit...\n");
+			while(1)
+			break;
+
+		}
+	
+	
 	}
+	sleep(1);
+
 }
+
+
 
 // Driver function
 int main(){
 	int sockfd, connfd, len;
+	char *file;
 	struct sockaddr_in servaddr, cli;
 
 	// socket create and verification
@@ -165,15 +291,13 @@ int main(){
 
 	send_info(connfd, log);
 	printf("The info are sent\n");
-	send_file(sockfd, connfd, servaddr, cli, log);
-	// Send 1/2 to Client
-	// Send an.txt/rg.txt to client
-	// Receive choice for download
-	// Send chosen file
 
-	// Function for exchange message between client and server
-	func(connfd);
-
-	// After chatting close the socket
+	if (log == 1)
+		send_file(sockfd, connfd, servaddr, cli, R_FILE);
+	else if (log == 2)
+		send_file(sockfd, connfd, servaddr, cli, A_FILE);
+		
+        while(1)
+	op_choice(sockfd, connfd, servaddr, cli, log);
 	close(sockfd);
 }

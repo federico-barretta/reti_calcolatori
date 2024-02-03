@@ -7,6 +7,8 @@
 #include <sys/socket.h>
 #include <unistd.h> // read(), write(), close()
 
+#include <sys/wait.h>
+
 #include "client_dtp.h"
 
 #define MAX 256
@@ -15,29 +17,57 @@
 
 void func(int sockfd, struct sockaddr_in servaddr){
 	char buff[MAX];
+	char fc[MAX];
+	char *file;
 	int n;
 	for (;;) {
-		bzero(buff, sizeof(buff));
+		bzero(buff, MAX);		//bzero(buff, sizeof(buff));
 		read(sockfd, buff, sizeof(buff));
-		if (strncmp(buff, "2", 1) == 0){
-			receive_file (sockfd, 2 , servaddr);
-			read_file(2);
-		} else
-			printf("Server :\n %s", buff);
-		if ((strncmp(buff, "exit", 4)) == 0) {
-			//execlp("rm", "rm", "-f", "*.txt");
+
+		if (strncmp(buff, "w", 1) == 0){
+			send_file(sockfd, servaddr, fc);
+			bzero(buff, sizeof(buff));
+		} else if (strncmp(buff, "r", 1) == 0){
+			receive_file (sockfd, fc);
+			bzero(buff, sizeof(buff));
+		}
+
+		if (strncmp(buff, "1", 1) == 0){
+			receive_file (sockfd , R_FILE);
+			bzero(buff, sizeof(buff));
+			read(sockfd, buff, sizeof(buff));
+		} else if (strncmp(buff, "2", 1) == 0){
+			receive_file (sockfd, A_FILE);
+			bzero(buff, sizeof(buff));
+			read(sockfd, buff, sizeof(buff));
+		} else if ((strncmp(buff, "exit", 4)) == 0) {
+
+			bzero(buff,sizeof(buff));
+		        read(sockfd, buff, sizeof(buff));
+		        remove(buff);
+		        bzero(buff,sizeof(buff));
+			
 			printf("Client Exit...\n");
 			break;
-		}
+		} else
+			printf("Server :\n %s", buff);
+
+
 		bzero(buff, sizeof(buff));
 		printf("\n> ");
 		n = 0;
 		while ((buff[n++] = getchar()) != '\n');
 		write(sockfd, buff, sizeof(buff));
+		strcpy(fc,buff);
+		// Check for text
+		if (strlen(buff) > 4){
+			file = &buff[strlen(buff) - 5];
+			if (strncmp(file, ".txt", 4) == 0){
+				fc[strcspn(fc,"\r\n")] = 0;
+				
+			}
+		}
 		bzero(buff, MAX);
-		//condition{
-
-		//}
 	}
 }
 
