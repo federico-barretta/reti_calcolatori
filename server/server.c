@@ -82,9 +82,9 @@ void op_choice (int sockfd, int connfd, struct sockaddr_in servaddr, struct sock
 
 	char buff[MAX];
 	char *op;
-        
+
 	if (id == 1){
-	
+
 		bzero(buff, MAX);
 		strcpy(buff, "\t1 - Download\n\t2 - Upload\n\t3 - Rename\n\t0 - Exit\n");
 		write(connfd, buff, sizeof(buff));
@@ -162,10 +162,14 @@ void op_choice (int sockfd, int connfd, struct sockaddr_in servaddr, struct sock
 			edit_file_name(o_name, n_name);
 
 			bzero(buff, MAX);
-			strcpy(buff, "\tFile name changed\n");
+			strcpy(buff, "\tFile name changed\nPress <Enter> to continue\n");
 			write(connfd, buff, sizeof(buff));
 
 			bzero(buff, MAX);
+			read(connfd, buff, sizeof(buff));
+
+			bzero(buff, MAX);
+
 
 		} else if (strncmp(buff, "0", 1) == 0){
 
@@ -173,7 +177,7 @@ void op_choice (int sockfd, int connfd, struct sockaddr_in servaddr, struct sock
 			strcpy(buff, "exit");
 			write(connfd, buff, sizeof(buff));
 			bzero(buff, MAX);
-			
+
 			strcpy(buff,R_FILE);
 			write(connfd, buff, sizeof(buff));
 			bzero(buff, MAX);
@@ -183,9 +187,9 @@ void op_choice (int sockfd, int connfd, struct sockaddr_in servaddr, struct sock
 			break;
 
 		}
-	
+
 	} else if (id == 2){
-	
+
 		bzero(buff, MAX);
 		strcpy(buff, "\t1 - Download\n\t0 - Exit\n");
 		write(connfd, buff, sizeof(buff));
@@ -219,7 +223,7 @@ void op_choice (int sockfd, int connfd, struct sockaddr_in servaddr, struct sock
 			strcpy(buff, "exit");
 			write(connfd, buff, sizeof(buff));
 			bzero(buff, MAX);
-			
+
 			strcpy(buff,A_FILE);
 			write(connfd, buff, sizeof(buff));
 			bzero(buff, MAX);
@@ -229,8 +233,8 @@ void op_choice (int sockfd, int connfd, struct sockaddr_in servaddr, struct sock
 			break;
 
 		}
-	
-	
+
+
 	}
 	sleep(1);
 
@@ -296,7 +300,7 @@ int main(){
 		send_file(sockfd, connfd, servaddr, cli, R_FILE);
 	else if (log == 2)
 		send_file(sockfd, connfd, servaddr, cli, A_FILE);
-		
+
         while(1)
 	op_choice(sockfd, connfd, servaddr, cli, log);
 	close(sockfd);

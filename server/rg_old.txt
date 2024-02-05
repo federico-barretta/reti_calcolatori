@@ -1,4 +1,3 @@
 pino.txt
-boh.txt
+funziona.txt
 peppe.txt
-pino.txt

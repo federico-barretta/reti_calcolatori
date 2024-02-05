@@ -19,10 +19,12 @@ void func(int sockfd, struct sockaddr_in servaddr){
 	char buff[MAX];
 	char fc[MAX];
 	char *file;
+	char op[MAX];
 	int n;
 	for (;;) {
 		bzero(buff, MAX);		//bzero(buff, sizeof(buff));
 		read(sockfd, buff, sizeof(buff));
+		strcpy(op, buff);
 
 		if (strncmp(buff, "w", 1) == 0){
 			send_file(sockfd, servaddr, fc);
@@ -46,7 +48,7 @@ void func(int sockfd, struct sockaddr_in servaddr){
 		        read(sockfd, buff, sizeof(buff));
 		        remove(buff);
 		        bzero(buff,sizeof(buff));
-			
+
 			printf("Client Exit...\n");
 			break;
 		} else
@@ -54,6 +56,8 @@ void func(int sockfd, struct sockaddr_in servaddr){
 
 
 		bzero(buff, sizeof(buff));
+		op[strcspn(op,"\t\r\n")] = 0;//rimuovo i caratteri tra parentesi dalla stringa op
+		if (strncmp(op, "w", 1) != 0 && strncmp(op, "r", 1) != 0){
 		printf("\n> ");
 		n = 0;
 		while ((buff[n++] = getchar()) != '\n');
@@ -64,8 +68,9 @@ void func(int sockfd, struct sockaddr_in servaddr){
 			file = &buff[strlen(buff) - 5];
 			if (strncmp(file, ".txt", 4) == 0){
 				fc[strcspn(fc,"\r\n")] = 0;
-				
+
 			}
+		}
 		}
 		bzero(buff, MAX);
 	}
